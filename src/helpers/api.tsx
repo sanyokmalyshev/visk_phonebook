@@ -1,0 +1,1 @@
+export const baseUrl = 'https://visk-phonebook-default-rtdb.firebaseio.com/';
