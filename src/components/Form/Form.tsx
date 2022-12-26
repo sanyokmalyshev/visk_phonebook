@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Contact } from 'types/contact';
 import './Form.scss';
 import { actions as ContactActions } from 'features/contacts';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { TouchedInputs } from 'types/touchedInputs';
 
 const initForm: Contact = {
@@ -38,8 +38,7 @@ const Form = ({ mode }: {mode: string}) => {
   const [emailErrors, setEmailErrors] = useState([true]);
   const [touchedInputs, setTouchedInputs] = useState(initTouchedInputs);
   const [formValid, setFormValid] = useState(false);
-  const location = useLocation();
-  const productId = +location.pathname.split('/')[2];
+  const { id } = useParams();
 
 
   useEffect(() => {
@@ -58,11 +57,12 @@ const Form = ({ mode }: {mode: string}) => {
   }, [formData, emailErrors]);
 
   useEffect(() => {
-    if (mode === 'edit') {
-      setFormData(contacts[productId]);
-      setEmailErrors([]);
+    if (mode === 'edit' && id) {
+      setFormData(contacts[+id]);
+      const emailErrors = contacts[+id].email.map(mail => false);
+      setEmailErrors(emailErrors);
     }
-  }, [contacts, mode, productId])
+  }, [contacts, mode, id])
 
   const onAddBtn = (type: string) => {  
     if (type === 'email' || type === 'phoneNumber') {
@@ -114,10 +114,17 @@ const Form = ({ mode }: {mode: string}) => {
     dispatch(ContactActions.setLoading(true));
     let data: Contact[] = [];
 
-    if (mode === 'edit') {
-      data[productId] = formData;
-    } else {
+    if (!contacts && mode === 'add') {
+      data = [formData];
+    }
+
+    if (contacts && mode === 'add') {
       data = [...contacts, formData];
+    }
+
+    if (mode === 'edit' && id) {
+      data = [...contacts];
+      data[+id] = formData;
     }
 
     axios

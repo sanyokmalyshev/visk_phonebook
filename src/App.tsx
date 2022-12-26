@@ -20,6 +20,8 @@ function App() {
       const { data } = await axios.get<Contact[]>(
         baseUrl + 'contacts.json'
       );
+      console.log(data);
+      
       dispatch(ContactActions.set(data || []));
 
     } catch (error) {
